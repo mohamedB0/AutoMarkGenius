@@ -104,7 +104,7 @@ def upload_student_sheet():
         flash('Invalid session. Please start over by uploading an answer key first.', 'danger')
         return redirect(url_for('index'))
     
-    mode = request.form.get('mode', 'manual')  # Get the mode: 'manual' or 'realtime'
+    mode = request.form.get('mode', 'manual')  # Get the mode: 'manual', 'realtime', or 'webcam'
     
     if 'studentSheet' not in request.files:
         flash('No file part', 'danger')
@@ -152,7 +152,7 @@ def upload_student_sheet():
             sessions[session_id]['results'].append(result)
             
             # If in real-time mode, automatically save to CSV
-            if mode == 'realtime':
+            if mode == 'realtime' or mode == 'webcam':
                 # Create a timestamp for the filename
                 timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                 csv_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{session_id}_realtime_{timestamp}.csv")
@@ -186,7 +186,7 @@ def upload_student_sheet():
                 'percentage': (score / len(correct_answers)) * 100 if len(correct_answers) > 0 else 0,
                 'details': details,
                 'mode': mode,
-                'auto_saved': mode == 'realtime'
+                'auto_saved': mode == 'realtime' or mode == 'webcam'
             })
         
         except Exception as e:
@@ -198,6 +198,98 @@ def upload_student_sheet():
     
     flash('Invalid file type. Please upload a PNG, JPG, JPEG or PDF file.', 'danger')
     return redirect(url_for('index'))
+
+
+@app.route('/process-webcam-image', methods=['POST'])
+def process_webcam_image():
+    """Process an image captured from the webcam"""
+    session_id = request.form.get('sessionId')
+    if not session_id or session_id not in sessions:
+        return jsonify({'error': 'Invalid session. Please start over by uploading an answer key first.'}), 400
+    
+    if 'webcamImage' not in request.files:
+        return jsonify({'error': 'No image found in request'}), 400
+    
+    file = request.files['webcamImage']
+    if not file:
+        return jsonify({'error': 'Empty file received'}), 400
+    
+    try:
+        # Save the captured image
+        filename = f"webcam_capture_{uuid.uuid4()}.jpg"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], f"{session_id}_{filename}")
+        file.save(filepath)
+        
+        # Process the captured image
+        img = preprocess_image(filepath)
+        grid_coords = sessions[session_id]['grid_coords']
+        student_answers = extract_answers(img, grid_coords)
+        
+        if not student_answers:
+            os.remove(filepath)
+            return jsonify({'error': 'Could not extract answers from the image'}), 400
+        
+        # Compare with answer key
+        correct_answers = sessions[session_id]['answer_key']
+        score, details = compare_answers(correct_answers, student_answers)
+        
+        # Store result
+        student_name = request.form.get('studentName', 'Unknown')
+        result = {
+            'student_name': student_name,
+            'filename': filename,
+            'score': score,
+            'total': len(correct_answers),
+            'percentage': (score / len(correct_answers)) * 100 if len(correct_answers) > 0 else 0,
+            'details': details,
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'mode': 'webcam'
+        }
+        
+        sessions[session_id]['student_sheets'].append(filepath)
+        sessions[session_id]['results'].append(result)
+        
+        # Automatically save to CSV (real-time mode)
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        csv_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{session_id}_webcam_{timestamp}.csv")
+        
+        # Create CSV file
+        with open(csv_path, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            # Write header
+            writer.writerow(['Student Name', 'Score', 'Total', 'Percentage', 'Timestamp', 'Detection Mode'])
+            # Write all results in the session
+            for r in sessions[session_id]['results']:
+                writer.writerow([
+                    r['student_name'],
+                    r['score'],
+                    r['total'],
+                    f"{r['percentage']:.2f}%",
+                    r['timestamp'],
+                    r.get('mode', 'manual')
+                ])
+        
+        # Add CSV path to session data
+        if 'csv_files' not in sessions[session_id]:
+            sessions[session_id]['csv_files'] = []
+        sessions[session_id]['csv_files'].append(csv_path)
+        
+        # Return result
+        return jsonify({
+            'student_name': student_name,
+            'score': score,
+            'total': len(correct_answers),
+            'percentage': (score / len(correct_answers)) * 100 if len(correct_answers) > 0 else 0,
+            'details': details,
+            'mode': 'webcam',
+            'auto_saved': True
+        })
+    
+    except Exception as e:
+        logger.error(f"Error processing webcam image: {str(e)}")
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/results/<session_id>')

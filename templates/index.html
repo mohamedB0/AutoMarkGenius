@@ -78,24 +78,63 @@
                                     Real-time Mode (Auto-save to CSV)
                                 </label>
                             </div>
-                            <small class="text-muted">Real-time mode will automatically save results to a CSV file after each detection.</small>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="mode" id="modeWebcam" value="webcam">
+                                <label class="form-check-label" for="modeWebcam">
+                                    Webcam Mode (Live camera capture)
+                                </label>
+                            </div>
+                            <small class="text-muted">Real-time and webcam modes automatically save results to a CSV file after each detection.</small>
                         </div>
                         
-                        <div class="upload-area" id="studentSheetUpload">
-                            <i class="fas fa-file-upload upload-icon"></i>
-                            <p>Drag and drop student sheet here or click to browse</p>
-                            <p class="file-name text-muted mt-2">No file selected</p>
-                            <input type="file" name="studentSheet" accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
+                        <!-- File upload section (shown for manual and realtime modes) -->
+                        <div id="fileUploadSection">
+                            <div class="upload-area" id="studentSheetUpload">
+                                <i class="fas fa-file-upload upload-icon"></i>
+                                <p>Drag and drop student sheet here or click to browse</p>
+                                <p class="file-name text-muted mt-2">No file selected</p>
+                                <input type="file" name="studentSheet" accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
+                            </div>
+                            
+                            <div class="preview-container mt-3" style="display: none;"></div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="btn-text">Process Student Sheet</span>
+                                </button>
+                            </div>
                         </div>
                         
-                        <div class="preview-container mt-3" style="display: none;"></div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                            <button type="submit" class="btn btn-primary">
-                                <span class="btn-text">Process Student Sheet</span>
-                            </button>
+                        <!-- Webcam controls (initially hidden) -->
+                        <div id="webcamControls" style="display: none;">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                                <button id="startWebcamBtn" type="button" class="btn btn-info">
+                                    <i class="fas fa-video"></i> Start Camera
+                                </button>
+                                <button id="stopWebcamBtn" type="button" class="btn btn-secondary" disabled>
+                                    <i class="fas fa-video-slash"></i> Stop Camera
+                                </button>
+                            </div>
                         </div>
                     </form>
+                    
+                    <!-- Webcam container (initially hidden) -->
+                    <div id="webcamContainer" class="mt-4" style="display: none;">
+                        <h5><i class="fas fa-camera me-2"></i>Live Camera Feed</h5>
+                        <div class="webcam-viewer">
+                            <video id="webcamVideo" autoplay playsinline style="width: 100%; max-height: 400px; background-color: #000;"></video>
+                            <div class="text-center mt-3">
+                                <button id="captureBtn" class="btn btn-primary" disabled>
+                                    <i class="fas fa-camera"></i> Capture Image
+                                </button>
+                            </div>
+                            <div class="mt-3">
+                                <img id="webcamPreview" style="display: none; width: 100%; max-height: 200px; object-fit: contain;" alt="Captured preview">
+                            </div>
+                            <!-- Hidden canvas for image processing -->
+                            <canvas id="webcamCanvas" style="display: none;"></canvas>
+                        </div>
+                    </div>
                 </section>
                 
                 <!-- Results Section -->
@@ -128,12 +167,16 @@
                         Scan the answer key with filled bubbles for correct answers. Make sure bubbles are clearly marked.
                     </li>
                     <li class="mb-2">
-                        <strong>Upload Student Sheets:</strong> 
-                        Scan each student's sheet. For best results, ensure sheets are well-lit and without shadows.
+                        <strong>Choose Detection Mode:</strong>
+                        <ul>
+                            <li><strong>Manual Mode:</strong> Upload and process each sheet individually.</li>
+                            <li><strong>Real-time Mode:</strong> Upload sheets and automatically save results to CSV.</li>
+                            <li><strong>Webcam Mode:</strong> Use your camera to capture and process sheets in real-time.</li>
+                        </ul>
                     </li>
                     <li class="mb-2">
-                        <strong>Real-time Mode:</strong> 
-                        Enable real-time mode to automatically save results to CSV after each scan.
+                        <strong>Process Student Sheets:</strong> 
+                        Upload or capture each student's answer sheet. Ensure sheets are well-lit and clearly visible.
                     </li>
                     <li class="mb-2">
                         <strong>View Results:</strong> 
@@ -147,10 +190,14 @@
                 
                 <div class="alert alert-info mt-3">
                     <i class="fas fa-lightbulb me-2"></i>
-                    <strong>Tip:</strong> For best results, ensure the scans are clear and well-aligned.
+                    <strong>Tip:</strong> For best webcam results, ensure good lighting and hold the sheet flat towards the camera.
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/webcam.js') }}"></script>
 {% endblock %}
