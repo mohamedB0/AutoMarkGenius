@@ -1,0 +1,390 @@
+/* Main styles for MCQ auto-corrector application */
+
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2980b9;
+  --accent-color: #f39c12;
+  --light-color: #ecf0f1;
+  --dark-color: #2c3e50;
+  --danger-color: #e74c3c;
+  --success-color: #2ecc71;
+  --info-color: #3498db;
+  --warning-color: #f39c12;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: var(--dark-color);
+  background-color: var(--light-color);
+  margin: 0;
+  padding: 0;
+}
+
+/* Header styles */
+.navbar {
+  background-color: var(--primary-color);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+  font-weight: bold;
+  color: white !important;
+}
+
+/* Main container */
+.container {
+  padding: 20px;
+  margin-top: 20px;
+}
+
+/* Card styles */
+.card {
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  background-color: #fff;
+  border: none;
+}
+
+.card-header {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: bold;
+  border-radius: 10px 10px 0 0 !important;
+  padding: 15px 20px;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+/* Form elements */
+.form-control {
+  border-radius: 5px;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  margin-bottom: 15px;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.form-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--dark-color);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-success {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.btn-success:hover {
+  background-color: #27ae60;
+  border-color: #27ae60;
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.btn-danger:hover {
+  background-color: #c0392b;
+  border-color: #c0392b;
+}
+
+/* File upload area */
+.upload-area {
+  border: 2px dashed #ddd;
+  border-radius: 5px;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.upload-area:hover, .upload-area.active {
+  border-color: var(--primary-color);
+  background-color: rgba(52, 152, 219, 0.05);
+}
+
+.upload-icon {
+  font-size: 48px;
+  color: var(--primary-color);
+  margin-bottom: 15px;
+}
+
+.upload-area p {
+  margin-bottom: 0;
+  color: #777;
+}
+
+/* Results section */
+.results-container {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-top: 30px;
+}
+
+.result-item {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.result-item:last-child {
+  border-bottom: none;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.result-name {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.result-score {
+  font-weight: bold;
+}
+
+.score-high {
+  color: var(--success-color);
+}
+
+.score-medium {
+  color: var(--warning-color);
+}
+
+.score-low {
+  color: var(--danger-color);
+}
+
+/* Progress bar */
+.progress {
+  height: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+.progress-bar-success {
+  background-color: var(--success-color);
+}
+
+.progress-bar-warning {
+  background-color: var(--warning-color);
+}
+
+.progress-bar-danger {
+  background-color: var(--danger-color);
+}
+
+/* Image preview */
+.image-preview {
+  max-width: 100%;
+  max-height: 300px;
+  margin: 10px auto;
+  display: block;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Student list */
+.student-list {
+  margin-top: 20px;
+}
+
+.student-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+/* Alert styling */
+.alert {
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+/* Spinner/loader */
+.spinner-border {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-header {
+    padding: 12px 15px;
+  }
+  
+  .card-body {
+    padding: 15px;
+  }
+  
+  .upload-area {
+    padding: 20px;
+  }
+  
+  .btn {
+    padding: 8px 16px;
+  }
+}
+
+/* Step-by-step process indicators */
+.step-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  position: relative;
+}
+
+.step:not(:last-child):after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  width: 20px;
+  height: 2px;
+  background-color: #ddd;
+  transform: translateY(-50%);
+}
+
+.step.active .step-number {
+  background-color: var(--primary-color);
+}
+
+.step.completed .step-number {
+  background-color: var(--success-color);
+}
+
+.step-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #ddd;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+}
+
+.step-text {
+  font-size: 14px;
+  color: #777;
+}
+
+.step.active .step-text {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.step.completed .step-text {
+  color: var(--success-color);
+}
+
+/* Tooltips */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Answer details table */
+.answer-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.answer-table th,
+.answer-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.answer-table th {
+  background-color: var(--light-color);
+  font-weight: 600;
+}
+
+.answer-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.correct-answer {
+  color: var(--success-color);
+  font-weight: bold;
+}
+
+.incorrect-answer {
+  color: var(--danger-color);
+  text-decoration: line-through;
+}
+
+/* Charts container */
+.chart-container {
+  position: relative;
+  height: 300px;
+  margin: 20px 0;
+}

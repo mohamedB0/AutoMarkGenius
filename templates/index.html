@@ -1,0 +1,135 @@
+{% extends 'layout.html' %}
+
+{% block title %}MCQ Auto-Corrector - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-check-circle me-2"></i>MCQ Auto-Corrector</h3>
+            </div>
+            <div class="card-body">
+                <p class="lead">Upload an answer key and student sheets to automatically grade multiple-choice questions.</p>
+                
+                <!-- Step indicators -->
+                <div class="step-indicator">
+                    <div class="step active">
+                        <div class="step-number">1</div>
+                        <div class="step-text">Upload Answer Key</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-text">Upload Student Sheets</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-text">View Results</div>
+                    </div>
+                </div>
+                
+                <!-- Answer Key Upload Section -->
+                <section id="answerKeySection" class="mb-4">
+                    <h4 class="mb-3"><i class="fas fa-key me-2"></i>Step 1: Upload Answer Key</h4>
+                    <p>Upload a scanned image of the answer key with filled bubbles for correct answers.</p>
+                    
+                    <form id="answerKeyForm" enctype="multipart/form-data">
+                        <div class="upload-area" id="answerKeyUpload">
+                            <i class="fas fa-file-upload upload-icon"></i>
+                            <p>Drag and drop your answer key here or click to browse</p>
+                            <p class="file-name text-muted mt-2">No file selected</p>
+                            <input type="file" name="answerKey" accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
+                        </div>
+                        
+                        <div class="preview-container mt-3" style="display: none;"></div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <span class="btn-text">Upload Answer Key</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+                
+                <!-- Student Sheet Upload Section -->
+                <section id="studentSheetSection" class="mb-4 disabled">
+                    <h4 class="mb-3"><i class="fas fa-user-graduate me-2"></i>Step 2: Upload Student Sheets</h4>
+                    <p>Upload scanned images of student answer sheets to grade them automatically.</p>
+                    
+                    <form id="studentSheetForm" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="studentName" class="form-label">Student Name</label>
+                            <input type="text" class="form-control" id="studentName" name="studentName" placeholder="Enter student name">
+                        </div>
+                        
+                        <input type="hidden" name="sessionId" value="">
+                        
+                        <div class="upload-area" id="studentSheetUpload">
+                            <i class="fas fa-file-upload upload-icon"></i>
+                            <p>Drag and drop student sheet here or click to browse</p>
+                            <p class="file-name text-muted mt-2">No file selected</p>
+                            <input type="file" name="studentSheet" accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
+                        </div>
+                        
+                        <div class="preview-container mt-3" style="display: none;"></div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <span class="btn-text">Process Student Sheet</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+                
+                <!-- Results Section -->
+                <section id="resultsSection" class="mb-4">
+                    <h4 class="mb-3"><i class="fas fa-poll me-2"></i>Step 3: Results</h4>
+                    
+                    <div id="resultsContainer" class="results-container" style="display: none;">
+                        <!-- Results will be added here dynamically -->
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-3">
+                        <button id="clearResultsBtn" class="btn btn-outline-secondary">Clear Results</button>
+                        <a id="viewResultsBtn" href="#" class="btn btn-success disabled">View All Results</a>
+                    </div>
+                </section>
+            </div>
+        </div>
+        
+        <!-- Instructions Card -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Instructions</h4>
+            </div>
+            <div class="card-body">
+                <h5>How to use the MCQ Auto-Corrector:</h5>
+                
+                <ol class="mt-3">
+                    <li class="mb-2">
+                        <strong>Upload Answer Key:</strong> 
+                        Scan the answer key with filled bubbles for correct answers. Make sure bubbles are clearly marked.
+                    </li>
+                    <li class="mb-2">
+                        <strong>Upload Student Sheets:</strong> 
+                        Scan each student's sheet. For best results, ensure sheets are well-lit and without shadows.
+                    </li>
+                    <li class="mb-2">
+                        <strong>View Results:</strong> 
+                        The system will automatically grade each sheet and provide scores and detailed breakdowns.
+                    </li>
+                    <li class="mb-2">
+                        <strong>Export Results:</strong> 
+                        You can export all results as a CSV file for your records.
+                    </li>
+                </ol>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Tip:</strong> For best results, ensure the scans are clear and well-aligned.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

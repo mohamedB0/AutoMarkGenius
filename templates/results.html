@@ -1,0 +1,193 @@
+{% extends 'layout.html' %}
+
+{% block title %}MCQ Auto-Corrector - Results{% endblock %}
+
+{% block head %}
+<style>
+    th.sort-asc::after {
+        content: " ↑";
+    }
+    th.sort-desc::after {
+        content: " ↓";
+    }
+    th[data-sort] {
+        cursor: pointer;
+    }
+    .score-pill {
+        padding: 5px 10px;
+        border-radius: 20px;
+        color: white;
+        font-weight: bold;
+        display: inline-block;
+        min-width: 80px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="fas fa-poll me-2"></i>Results</h3>
+                <div>
+                    <a href="{{ url_for('export_csv', session_id=session_id) }}" class="btn btn-success">
+                        <i class="fas fa-file-csv me-2"></i>Export to CSV
+                    </a>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-primary ms-2">
+                        <i class="fas fa-plus me-2"></i>Add More Sheets
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if results %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>{{ results|length }}</strong> student sheets processed with <strong>{{ num_questions }}</strong> questions per sheet.
+                    </div>
+                    
+                    <!-- Charts Section -->
+                    <div class="row mb-4">
+                        <div class="col-lg-8 mb-3">
+                            <div class="chart-container">
+                                <canvas id="scoresChart" data-results="{{ results|tojson }}"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-3">
+                            <div class="chart-container">
+                                <canvas id="distributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Table -->
+                    <div class="table-responsive">
+                        <div class="d-flex justify-content-end mb-2">
+                            <button id="expandAllBtn" class="btn btn-sm btn-outline-primary me-2">Expand All</button>
+                            <button id="collapseAllBtn" class="btn btn-sm btn-outline-secondary">Collapse All</button>
+                        </div>
+                        
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th data-sort="name">Student Name</th>
+                                    <th data-sort="score">Score</th>
+                                    <th data-sort="percentage">Percentage</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                <tr>
+                                    <td data-name="{{ result.student_name }}">{{ result.student_name }}</td>
+                                    <td data-score="{{ result.score }}">{{ result.score }}/{{ result.total }}</td>
+                                    <td data-percentage="{{ result.percentage }}">
+                                        <span class="score-pill" style="background-color: 
+                                            {% if result.percentage >= 80 %}#2ecc71
+                                            {% elif result.percentage >= 60 %}#f39c12
+                                            {% else %}#e74c3c{% endif %}">
+                                            {{ "%.2f"|format(result.percentage) }}%
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary view-details-btn">View Details</button>
+                                        <div class="answer-details mt-3" style="display: none;">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Question</th>
+                                                        <th>Correct Answer</th>
+                                                        <th>Student Answer</th>
+                                                        <th>Result</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for detail in result.details %}
+                                                    <tr>
+                                                        <td>{{ detail.question }}</td>
+                                                        <td>{{ detail.correct_answer }}</td>
+                                                        <td class="{% if detail.is_correct %}correct-answer{% else %}incorrect-answer{% endif %}">
+                                                            {{ detail.student_answer }}
+                                                        </td>
+                                                        <td>{{ "✓" if detail.is_correct else "✗" }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        No results found. Please go back and upload student sheets.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Summary Statistics Card -->
+        {% if results %}
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Summary Statistics</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Average Score</h5>
+                                <h2 class="display-5">
+                                    {{ "%.2f"|format(results|map(attribute='percentage')|sum / results|length) }}%
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Highest Score</h5>
+                                <h2 class="display-5 text-success">
+                                    {{ "%.2f"|format(results|map(attribute='percentage')|max) }}%
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Lowest Score</h5>
+                                <h2 class="display-5 text-danger">
+                                    {{ "%.2f"|format(results|map(attribute='percentage')|min) }}%
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Pass Rate</h5>
+                                {% set pass_count = results|selectattr('percentage', 'ge', 60)|list|length %}
+                                <h2 class="display-5 {% if pass_count / results|length >= 0.7 %}text-success{% else %}text-warning{% endif %}">
+                                    {{ "%.1f"|format(pass_count / results|length * 100) }}%
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/preview.js') }}"></script>
+{% endblock %}
