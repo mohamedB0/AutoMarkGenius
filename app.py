@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
 import numpy as np
-from mcq_processor import preprocess_image, detect_grid, extract_answers, compare_answers
+from mcq_processor import preprocess_image, detect_grid, extract_answers, compare_answers, collect_training_data
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -83,6 +83,10 @@ def upload_answer_key():
                 'results': []
             }
             
+            # Train ML model with the answer key data
+            collect_training_data(img, grid_coords, answers)
+            logger.info(f"Collected training data from answer key with {len(answers)} answers")
+            
             flash('Answer key uploaded successfully', 'success')
             return jsonify({'session_id': session_id, 'message': 'Answer key processed successfully'})
         
@@ -134,6 +138,11 @@ def upload_student_sheet():
             # Compare with answer key
             correct_answers = sessions[session_id]['answer_key']
             score, details = compare_answers(correct_answers, student_answers)
+            
+            # If score is high enough (at least 70%), use for training data
+            if score / len(correct_answers) >= 0.7:
+                collect_training_data(img, grid_coords, student_answers)
+                logger.info(f"Collected training data from student sheet with {len(student_answers)} answers")
             
             # Store result
             student_name = request.form.get('studentName', 'Unknown')
@@ -232,6 +241,11 @@ def process_webcam_image():
         # Compare with answer key
         correct_answers = sessions[session_id]['answer_key']
         score, details = compare_answers(correct_answers, student_answers)
+        
+        # If score is high enough (at least 70%), use for training data
+        if score / len(correct_answers) >= 0.7:
+            collect_training_data(img, grid_coords, student_answers)
+            logger.info(f"Collected training data from webcam image with {len(student_answers)} answers")
         
         # Store result
         student_name = request.form.get('studentName', 'Unknown')
