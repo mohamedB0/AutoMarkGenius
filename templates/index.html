@@ -107,6 +107,44 @@
                         
                         <!-- Webcam controls (initially hidden) -->
                         <div id="webcamControls" style="display: none;">
+                            <!-- IP Webcam Option -->
+                            <div class="mb-3 mt-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="useIpWebcam">
+                                    <label class="form-check-label" for="useIpWebcam">
+                                        Use IP Webcam (Android)
+                                    </label>
+                                </div>
+                            <!-- IP Webcam Option --> 
+                            <div class="mb-3 mt-3"> 
+                                <div class="form-check"> 
+                                    <input class="form-check-input" type="checkbox" id="useIpWebcam"> 
+                                    <label class="form-check-label" for="useIpWebcam"> 
+                                        Use IP Webcam (Android) 
+                                    </label> 
+                                </div> 
+                                <div id="ipWebcamUrlGroup" class="mt-2" style="display: none;"> 
+                                    <label for="ipWebcamUrl" class="form-label">IP Webcam URL</label> 
+                                    <input type="text" class="form-control" id="ipWebcamUrl" 
+                                           placeholder="http://192.168.1.x:8080" 
+                                           aria-describedby="ipWebcamHelp"> 
+                                    <div id="ipWebcamHelp" class="form-text"> 
+                                        Enter the URL from the IP Webcam app. Example: http://192.168.1.100:8080 
+                                    </div> 
+                                </div> 
+                            </div> 
+
+                                <div id="ipWebcamUrlGroup" class="mt-2" style="display: none;">
+                                    <label for="ipWebcamUrl" class="form-label">IP Webcam URL</label>
+                                    <input type="text" class="form-control" id="ipWebcamUrl" 
+                                           placeholder="http://192.168.1.x:8080" 
+                                           aria-describedby="ipWebcamHelp">
+                                    <div id="ipWebcamHelp" class="form-text">
+                                        Enter the URL from the IP Webcam app. Example: http://192.168.1.100:8080
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
                                 <button id="startWebcamBtn" type="button" class="btn btn-info">
                                     <i class="fas fa-video"></i> Start Camera

@@ -9,37 +9,77 @@ document.addEventListener('DOMContentLoaded', function() {
     const webcamPreview = document.getElementById('webcamPreview');
     const startWebcamBtn = document.getElementById('startWebcamBtn');
     const stopWebcamBtn = document.getElementById('stopWebcamBtn');
+    const ipWebcamUrlInput = document.getElementById('ipWebcamUrl');
+    const useIpWebcamCheckbox = document.getElementById('useIpWebcam');
     
     let stream = null;
     let mediaRecorder = null;
     let imageCapture = null;
+    let isUsingIpWebcam = false;
     
-    // Start webcam
+    // Start webcam (device or IP webcam)
     async function startWebcam() {
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment' },
-                audio: false 
-            });
+            // Check if using IP webcam
+            isUsingIpWebcam = useIpWebcamCheckbox && useIpWebcamCheckbox.checked;
             
-            webcamVideo.srcObject = stream;
-            
-            // Enable capture button once the video is loaded
-            webcamVideo.onloadedmetadata = () => {
-                captureBtn.disabled = false;
-                stopWebcamBtn.disabled = false;
-                startWebcamBtn.disabled = true;
+            if (isUsingIpWebcam) {
+                // Using IP webcam
+                const ipWebcamUrl = ipWebcamUrlInput.value.trim();
                 
-                // Setup image capture
-                const track = stream.getVideoTracks()[0];
-                imageCapture = new ImageCapture(track);
+                if (!ipWebcamUrl) {
+                    showAlert('Please enter a valid IP webcam URL', 'warning');
+                    return;
+                }
                 
-                // Show webcam container
-                webcamContainer.style.display = 'block';
+                // Set video source to IP webcam stream
+                const videoUrl = ipWebcamUrl.endsWith('/video') ? ipWebcamUrl : `${ipWebcamUrl}/video`;
+                webcamVideo.src = videoUrl;
                 
-                // Scroll to webcam
-                webcamContainer.scrollIntoView({ behavior: 'smooth' });
-            };
+                // Enable UI for IP webcam
+                webcamVideo.onloadeddata = () => {
+                    captureBtn.disabled = false;
+                    stopWebcamBtn.disabled = false;
+                    startWebcamBtn.disabled = true;
+                    
+                    // Show webcam container
+                    webcamContainer.style.display = 'block';
+                    
+                    // Scroll to webcam
+                    webcamContainer.scrollIntoView({ behavior: 'smooth' });
+                };
+                
+                // Handle load error
+                webcamVideo.onerror = () => {
+                    showAlert('Error connecting to IP webcam. Please check the URL and make sure the IP webcam app is running.', 'danger');
+                    stopWebcam();
+                };
+            } else {
+                // Using device webcam
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' },
+                    audio: false 
+                });
+                
+                webcamVideo.srcObject = stream;
+                
+                // Enable capture button once the video is loaded
+                webcamVideo.onloadedmetadata = () => {
+                    captureBtn.disabled = false;
+                    stopWebcamBtn.disabled = false;
+                    startWebcamBtn.disabled = true;
+                    
+                    // Setup image capture
+                    const track = stream.getVideoTracks()[0];
+                    imageCapture = new ImageCapture(track);
+                    
+                    // Show webcam container
+                    webcamContainer.style.display = 'block';
+                    
+                    // Scroll to webcam
+                    webcamContainer.scrollIntoView({ behavior: 'smooth' });
+                };
+            }
         } catch (error) {
             console.error('Error accessing webcam:', error);
             showAlert('Error accessing webcam: ' + error.message, 'danger');
@@ -48,31 +88,50 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Stop webcam
     function stopWebcam() {
-        if (stream) {
+        if (isUsingIpWebcam) {
+            // IP webcam cleanup
+            webcamVideo.src = '';
+            webcamVideo.srcObject = null;
+        } else if (stream) {
+            // Device webcam cleanup
             stream.getTracks().forEach(track => track.stop());
             webcamVideo.srcObject = null;
             stream = null;
             imageCapture = null;
-            
-            captureBtn.disabled = true;
-            stopWebcamBtn.disabled = true;
-            startWebcamBtn.disabled = false;
-            
-            // Hide webcam container
-            webcamContainer.style.display = 'none';
         }
+        
+        captureBtn.disabled = true;
+        stopWebcamBtn.disabled = true;
+        startWebcamBtn.disabled = false;
+        
+        // Hide webcam container
+        webcamContainer.style.display = 'none';
     }
     
-    // Capture image from webcam
+    // Capture image from webcam (device or IP)
     async function captureImage() {
-        if (!imageCapture) return;
-        
         try {
             captureBtn.disabled = true;
             captureBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Capturing...';
             
-            // Capture image
-            const blob = await imageCapture.takePhoto();
+            let blob;
+            
+            if (isUsingIpWebcam) {
+                // Capture from IP webcam by drawing video to canvas
+                const canvas = document.getElementById('webcamCanvas');
+                canvas.width = webcamVideo.videoWidth;
+                canvas.height = webcamVideo.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
+                
+                // Convert canvas to blob
+                blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+            } else if (imageCapture) {
+                // Capture from device webcam
+                blob = await imageCapture.takePhoto();
+            } else {
+                throw new Error('No capture method available');
+            }
             
             // Display captured image
             const imgUrl = URL.createObjectURL(blob);
@@ -98,10 +157,14 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 // Display results
-                displayResult(data);
+                if (typeof displayResult === 'function') {
+                    displayResult(data);
+                }
                 
                 // Update steps
-                updateSteps(2);
+                if (typeof updateSteps === 'function') {
+                    updateSteps(2);
+                }
                 
                 // Show success message
                 showAlert('Image processed successfully!', 'success');
@@ -133,6 +196,49 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Function to show alerts (if not defined in main.js)
+    function showAlert(message, type) {
+        if (typeof window.showAlert === 'function') {
+            window.showAlert(message, type);
+            return;
+        }
+        
+        const alertsContainer = document.getElementById('alertsContainer');
+        if (!alertsContainer) return;
+        
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show`;
+        alert.setAttribute('role', 'alert');
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        alertsContainer.appendChild(alert);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.classList.remove('show');
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alertsContainer.removeChild(alert);
+                    }
+                }, 150);
+            }
+        }, 5000);
+    }
+    
+    // Toggle IP webcam URL input visibility
+    if (useIpWebcamCheckbox) {
+        useIpWebcamCheckbox.addEventListener('change', function() {
+            const ipWebcamUrlGroup = document.getElementById('ipWebcamUrlGroup');
+            if (ipWebcamUrlGroup) {
+                ipWebcamUrlGroup.style.display = this.checked ? 'block' : 'none';
+            }
+        });
+    }
+    
     // Event listeners
     if (startWebcamBtn) {
         startWebcamBtn.addEventListener('click', startWebcam);
@@ -144,22 +250,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (captureBtn) {
         captureBtn.addEventListener('click', captureImage);
-    }
-    
-    // Check if browser supports ImageCapture API
-    if (typeof ImageCapture === 'undefined') {
-        if (startWebcamBtn) {
-            startWebcamBtn.disabled = true;
-            startWebcamBtn.title = 'Your browser does not support the ImageCapture API';
-        }
-        
-        const webcamModeRadio = document.getElementById('modeWebcam');
-        if (webcamModeRadio) {
-            webcamModeRadio.disabled = true;
-            webcamModeRadio.parentElement.title = 'Your browser does not support the ImageCapture API';
-        }
-        
-        showAlert('Your browser does not support webcam capture. Please use Chrome or Edge for this feature.', 'warning');
     }
     
     // Handle mode change

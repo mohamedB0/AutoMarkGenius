@@ -445,3 +445,29 @@ body {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
 }
+
+/* IP Webcam specific styles */
+#ipWebcamUrlGroup {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+}
+
+#ipWebcamHelp {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* IP Webcam specific styles */
+#ipWebcamUrlGroup {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+}
+
+#ipWebcamHelp {
+  font-size: 0.85rem;
+  color: #666;
+}
