@@ -1,13 +1,13 @@
 /* Main styles for MCQ auto-corrector application */
 
 :root {
-  --primary-color: #3498db;
-  --secondary-color: #2980b9;
+  --primary-color: #58d68d;
+  --secondary-color: #27ae60;
   --accent-color: #f39c12;
   --light-color: #ecf0f1;
   --dark-color: #2c3e50;
   --danger-color: #e74c3c;
-  --success-color: #2ecc71;
+  --success-color: #58d68d;
   --info-color: #3498db;
   --warning-color: #f39c12;
 }
@@ -69,7 +69,7 @@ body {
 
 .form-control:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(88, 214, 141, 0.25);
 }
 
 .form-label {
@@ -125,7 +125,7 @@ body {
 
 .upload-area:hover, .upload-area.active {
   border-color: var(--primary-color);
-  background-color: rgba(52, 152, 219, 0.05);
+  background-color: rgba(88, 214, 141, 0.05);
 }
 
 .upload-icon {
@@ -444,19 +444,6 @@ body {
 .form-check-input:checked {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
-}
-
-/* IP Webcam specific styles */
-#ipWebcamUrlGroup {
-  background-color: #f8f9fa;
-  padding: 15px;
-  border-radius: 8px;
-  border-left: 4px solid var(--primary-color);
-}
-
-#ipWebcamHelp {
-  font-size: 0.85rem;
-  color: #666;
 }
 
 /* IP Webcam specific styles */
