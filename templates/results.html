@@ -22,6 +22,12 @@
         min-width: 80px;
         text-align: center;
     }
+    .mode-badge {
+        font-size: 0.75rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 5px;
+    }
 </style>
 {% endblock %}
 
@@ -60,6 +66,11 @@
                             </div>
                         </div>
                     </div>
+                        <div class="col-lg-4 mb-3">
+                            <div class="chart-container">
+                                <canvas id="modeChart"></canvas>
+                            </div>
+                        </div>
                     
                     <!-- Results Table -->
                     <div class="table-responsive">
@@ -74,6 +85,7 @@
                                     <th data-sort="name">Student Name</th>
                                     <th data-sort="score">Score</th>
                                     <th data-sort="percentage">Percentage</th>
+                                    <th>Mode</th>
                                     <th>Details</th>
                                 </tr>
                             </thead>
@@ -89,6 +101,13 @@
                                             {% else %}#e74c3c{% endif %}">
                                             {{ "%.2f"|format(result.percentage) }}%
                                         </span>
+                                    </td>
+                                    <td>
+                                        {% if result.mode == 'realtime' %}
+                                            <span class="badge bg-info">Real-time</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Manual</span>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-primary view-details-btn">View Details</button>
@@ -177,6 +196,30 @@
                                 <h2 class="display-5 {% if pass_count / results|length >= 0.7 %}text-success{% else %}text-warning{% endif %}">
                                     {{ "%.1f"|format(pass_count / results|length * 100) }}%
                                 </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Detection Mode Stats -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5>Detection Modes</h5>
+                        <div class="progress" style="height: 30px;">
+                            {% set realtime_count = results|selectattr('mode', 'eq', 'realtime')|list|length %}
+                            {% set manual_count = results|length - realtime_count %}
+                            {% set realtime_percentage = (realtime_count / results|length * 100) if results|length > 0 else 0 %}
+                            {% set manual_percentage = 100 - realtime_percentage %}
+                            
+                            <div class="progress-bar bg-info" role="progressbar" 
+                                style="width: {{ realtime_percentage }}%" 
+                                aria-valuenow="{{ realtime_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ realtime_count }} Real-time ({{ "%.1f"|format(realtime_percentage) }}%)
+                            </div>
+                            <div class="progress-bar bg-secondary" role="progressbar" 
+                                style="width: {{ manual_percentage }}%" 
+                                aria-valuenow="{{ manual_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ manual_count }} Manual ({{ "%.1f"|format(manual_percentage) }}%)
                             </div>
                         </div>
                     </div>

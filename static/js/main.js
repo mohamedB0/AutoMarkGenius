@@ -241,9 +241,21 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const resultItem = document.createElement('div');
         resultItem.className = 'result-item';
+        
+        // Add real-time mode badge if applicable
+        const modeBadge = data.mode === 'realtime' ? 
+            `<span class="badge bg-info ms-2">Real-time</span>` : '';
+        
+        // Add auto-saved indicator if applicable
+        const autoSavedIndicator = data.auto_saved ? 
+            `<div class="text-success small mt-1"><i class="fas fa-check-circle"></i> Auto-saved to CSV</div>` : '';
+        
         resultItem.innerHTML = `
             <div class="result-header">
-                <div class="result-name">${data.student_name || 'Student'}</div>
+                <div class="result-name">
+                    ${data.student_name || 'Student'}
+                    ${modeBadge}
+                </div>
                 <div class="result-score ${scoreClass}">${data.score}/${data.total} (${percentage}%)</div>
             </div>
             <div class="progress">
@@ -251,6 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
                      role="progressbar" style="width: ${percentage}%"
                      aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
+            ${autoSavedIndicator}
             <button class="btn btn-sm btn-outline-primary mt-2 view-details-btn">View Details</button>
             <div class="answer-details mt-3" style="display: none;">
                 <table class="answer-table">

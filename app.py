@@ -104,6 +104,8 @@ def upload_student_sheet():
         flash('Invalid session. Please start over by uploading an answer key first.', 'danger')
         return redirect(url_for('index'))
     
+    mode = request.form.get('mode', 'manual')  # Get the mode: 'manual' or 'realtime'
+    
     if 'studentSheet' not in request.files:
         flash('No file part', 'danger')
         return redirect(request.url)
@@ -142,11 +144,39 @@ def upload_student_sheet():
                 'total': len(correct_answers),
                 'percentage': (score / len(correct_answers)) * 100 if len(correct_answers) > 0 else 0,
                 'details': details,
-                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'mode': mode
             }
             
             sessions[session_id]['student_sheets'].append(filepath)
             sessions[session_id]['results'].append(result)
+            
+            # If in real-time mode, automatically save to CSV
+            if mode == 'realtime':
+                # Create a timestamp for the filename
+                timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                csv_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{session_id}_realtime_{timestamp}.csv")
+                
+                # Create CSV file
+                with open(csv_path, 'w', newline='') as csvfile:
+                    writer = csv.writer(csvfile)
+                    # Write header
+                    writer.writerow(['Student Name', 'Score', 'Total', 'Percentage', 'Timestamp', 'Detection Mode'])
+                    # Write all results in the session
+                    for r in sessions[session_id]['results']:
+                        writer.writerow([
+                            r['student_name'],
+                            r['score'],
+                            r['total'],
+                            f"{r['percentage']:.2f}%",
+                            r['timestamp'],
+                            r.get('mode', 'manual')
+                        ])
+                
+                # Add CSV path to session data
+                if 'csv_files' not in sessions[session_id]:
+                    sessions[session_id]['csv_files'] = []
+                sessions[session_id]['csv_files'].append(csv_path)
             
             # Return result
             return jsonify({
@@ -154,7 +184,9 @@ def upload_student_sheet():
                 'score': score,
                 'total': len(correct_answers),
                 'percentage': (score / len(correct_answers)) * 100 if len(correct_answers) > 0 else 0,
-                'details': details
+                'details': details,
+                'mode': mode,
+                'auto_saved': mode == 'realtime'
             })
         
         except Exception as e:
@@ -197,7 +229,7 @@ def export_csv(session_id):
     csv_writer = csv.writer(output)
     
     # Write header
-    csv_writer.writerow(['Student Name', 'Score', 'Total', 'Percentage', 'Timestamp'])
+    csv_writer.writerow(['Student Name', 'Score', 'Total', 'Percentage', 'Timestamp', 'Detection Mode'])
     
     # Write data
     for result in results:
@@ -206,7 +238,8 @@ def export_csv(session_id):
             result['score'],
             result['total'],
             f"{result['percentage']:.2f}%",
-            result['timestamp']
+            result['timestamp'],
+            result.get('mode', 'manual')
         ])
     
     # Prepare response

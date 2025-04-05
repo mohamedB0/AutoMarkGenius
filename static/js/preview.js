@@ -116,6 +116,43 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             }
+            
+            // Create detection modes chart
+            const modeChartEl = document.getElementById('modeChart');
+            if (modeChartEl) {
+                // Count detection modes
+                const realTimeModeCount = resultsData.filter(r => r.mode === 'realtime').length;
+                const manualModeCount = resultsData.length - realTimeModeCount;
+                
+                new Chart(modeChartEl, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Real-time Mode', 'Manual Mode'],
+                        datasets: [{
+                            data: [realTimeModeCount, manualModeCount],
+                            backgroundColor: ['rgba(23, 162, 184, 0.7)', 'rgba(108, 117, 125, 0.7)'],
+                            borderColor: ['rgba(23, 162, 184, 1)', 'rgba(108, 117, 125, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Detection Modes',
+                                font: {
+                                    size: 18
+                                }
+                            },
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
         }
     }
     
