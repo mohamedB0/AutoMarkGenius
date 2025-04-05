@@ -8,6 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
 import numpy as np
+from flask_cors import CORS
 from mcq_processor import preprocess_image, detect_grid, extract_answers, compare_answers, collect_training_data
 
 # Configure logging
@@ -16,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 # Create the app
 app = Flask(__name__)
+# Enable CORS for IP webcam integration
+CORS(app)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 

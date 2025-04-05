@@ -20,12 +20,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Start webcam (device or IP webcam)
     async function startWebcam() {
         try {
+            console.log("Starting webcam...");
             // Check if using IP webcam
             isUsingIpWebcam = useIpWebcamCheckbox && useIpWebcamCheckbox.checked;
+            console.log("Using IP webcam:", isUsingIpWebcam);
             
             if (isUsingIpWebcam) {
                 // Using IP webcam
                 const ipWebcamUrl = ipWebcamUrlInput.value.trim();
+                console.log("IP webcam URL:", ipWebcamUrl);
                 
                 if (!ipWebcamUrl) {
                     showAlert('Please enter a valid IP webcam URL', 'warning');
@@ -34,23 +37,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Set video source to IP webcam stream
                 const videoUrl = ipWebcamUrl.endsWith('/video') ? ipWebcamUrl : `${ipWebcamUrl}/video`;
+                console.log("Video URL:", videoUrl);
+                
+                // Show webcam container first to make sure the video element is visible
+                webcamContainer.style.display = 'block';
+                
+                // Set source and start loading
                 webcamVideo.src = videoUrl;
                 
                 // Enable UI for IP webcam
                 webcamVideo.onloadeddata = () => {
+                    console.log("IP webcam video loaded");
                     captureBtn.disabled = false;
                     stopWebcamBtn.disabled = false;
                     startWebcamBtn.disabled = true;
                     
-                    // Show webcam container
-                    webcamContainer.style.display = 'block';
-                    
                     // Scroll to webcam
                     webcamContainer.scrollIntoView({ behavior: 'smooth' });
+                    
+                    showAlert('IP Webcam connected successfully', 'success');
                 };
                 
                 // Handle load error
-                webcamVideo.onerror = () => {
+                webcamVideo.onerror = (e) => {
+                    console.error("Error loading IP webcam:", e);
                     showAlert('Error connecting to IP webcam. Please check the URL and make sure the IP webcam app is running.', 'danger');
                     stopWebcam();
                 };
@@ -121,14 +131,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 const canvas = document.getElementById('webcamCanvas');
                 canvas.width = webcamVideo.videoWidth;
                 canvas.height = webcamVideo.videoHeight;
+                console.log("Canvas dimensions:", canvas.width, "x", canvas.height);
+                console.log("Video dimensions:", webcamVideo.videoWidth, "x", webcamVideo.videoHeight);
+                
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
                 
                 // Convert canvas to blob
                 blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+                console.log("Captured image from IP webcam, blob size:", blob.size);
             } else if (imageCapture) {
                 // Capture from device webcam
                 blob = await imageCapture.takePhoto();
+                console.log("Captured image from device webcam, blob size:", blob.size);
             } else {
                 throw new Error('No capture method available');
             }
@@ -156,6 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
+                console.log("Received processing results:", data);
                 // Display results
                 if (typeof displayResult === 'function') {
                     displayResult(data);
@@ -235,6 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const ipWebcamUrlGroup = document.getElementById('ipWebcamUrlGroup');
             if (ipWebcamUrlGroup) {
                 ipWebcamUrlGroup.style.display = this.checked ? 'block' : 'none';
+                console.log("IP webcam checkbox changed, showing URL input:", this.checked);
             }
         });
     }
@@ -261,12 +278,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (this.value === 'webcam') {
                     document.getElementById('webcamControls').style.display = 'block';
                     document.getElementById('fileUploadSection').style.display = 'none';
+                    console.log("Webcam mode selected");
                 } else {
                     document.getElementById('webcamControls').style.display = 'none';
                     document.getElementById('fileUploadSection').style.display = 'block';
                     
                     // Stop webcam if it's running
                     stopWebcam();
+                    console.log("Non-webcam mode selected");
                 }
             });
         });
